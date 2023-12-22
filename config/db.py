@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = MongoClient(os.getenv('DB_HOST'))
+client = MongoClient(os.environ.get('DB_HOST')+"?retryWrites=true&w=majority")
 
 db = client.learn_fastapi
 
