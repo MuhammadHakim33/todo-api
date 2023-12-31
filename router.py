@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from models.model_todo import TodoModel
 from models.model_user import RegistrationModel, LoginModel
 from service.service_todo import TodoService
@@ -12,7 +13,7 @@ def store(todo: TodoModel, service_todo: TodoService = Depends()):
     return todo
 
 @route.get("/todos")
-def get(category : str | None = None, service_todo: TodoService = Depends()):
+def get(category : Optional[str] = None, service_todo: TodoService = Depends()):
     return service_todo.get_todo(category)
 
 @route.put("/todos/{todo_id}")
