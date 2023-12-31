@@ -2,6 +2,7 @@ from fastapi import Depends
 from bson.objectid import ObjectId
 from models.model_todo import TodoModel
 from repository.repository_todo import TodoRepository
+from typing import Optional
 
 class TodoService:
     def __init__(self, repo_todo: TodoRepository = Depends()):
@@ -10,7 +11,7 @@ class TodoService:
     def store_todo(self, todo: TodoModel):
         return self.repo_todo.store(todo)
     
-    def get_todo(self, category: str | None = None):
+    def get_todo(self, category: Optional[str] = None):
         filter = {}
         if category is not None:
             filter["category"] = category
