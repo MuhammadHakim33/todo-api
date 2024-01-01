@@ -22,7 +22,7 @@ class TodoService:
         newData = {
             "name": todo.name if todo.name != "string" else oldData["name"],
             "category": todo.category if todo.category != "string" else oldData["category"],
-            "complete": oldData["category"],
+            "complete": oldData["complete"],
         }
         return self.repo_todo.update(todo_id, newData)
     
