@@ -11,10 +11,12 @@ class TodoService:
     def store_todo(self, todo: TodoModel):
         return self.repo_todo.store(todo)
     
-    def get_todo(self, category: Optional[str] = None):
+    def get_todo(self, category: Optional[str] = None, complete: Optional[bool] = None):
         filter = {}
         if category is not None:
             filter["category"] = category
+        if complete is not None:
+            filter["complete"] = complete
         return self.repo_todo.get(filter)
     
     def update_todo(self, todo_id: str, todo: TodoModel):
