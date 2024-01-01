@@ -21,7 +21,8 @@ class TodoService:
         oldData = self.repo_todo.get_one({"_id": ObjectId(todo_id)})
         newData = {
             "name": todo.name if todo.name != "string" else oldData["name"],
-            "category": todo.category if todo.category != "string" else oldData["category"]
+            "category": todo.category if todo.category != "string" else oldData["category"],
+            "complete": oldData["category"],
         }
         return self.repo_todo.update(todo_id, newData)
     
