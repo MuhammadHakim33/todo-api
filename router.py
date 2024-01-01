@@ -13,8 +13,8 @@ def store(todo: TodoModel, service_todo: TodoService = Depends()):
     return todo
 
 @route.get("/todos")
-def get(category : Optional[str] = None, service_todo: TodoService = Depends()):
-    return service_todo.get_todo(category)
+def get(category: Optional[str] = None, complete: Optional[bool] = None, service_todo: TodoService = Depends()):
+    return service_todo.get_todo(category, complete)
 
 @route.put("/todos/{todo_id}")
 def update(todo_id: str, todo: TodoModel, service_todo: TodoService = Depends()):
