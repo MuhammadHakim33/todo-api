@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 from models.model_todo import TodoModel
-from models.model_user import RegistrationModel, LoginModel
+from models.model_user import RegisterModel, LoginModel
 from service.service_todo import TodoService
 from service.service_user import UserService
 
@@ -26,10 +26,10 @@ def delete(todo_id: str, service_todo: TodoService = Depends()):
 
 
 
-@route.post("/user/registration")
-def registration(user: RegistrationModel, service_user: UserService = Depends()):
-    service_user.registration(user)
-    return user
+@route.post("/user/register")
+def register(user: RegisterModel, service_user: UserService = Depends()):
+    result = service_user.register(user)
+    return result
 
 @route.post("/user/login")
 def login(user: LoginModel, service_user: UserService = Depends()):
