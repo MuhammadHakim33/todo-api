@@ -12,12 +12,3 @@ class UserRepository:
     def create(self, user: UserBase):
         self.repository.insert_one(user.model_dump())
         return {"message": "User registration successful", "data": user.model_dump(exclude='password')}
-    
-    # def find(self, user: LoginModel):
-    #     result = self.repository.find_one({
-    #         "email" : user.email,
-    #         "password" : user.password
-    #     })
-    #     if result is None:
-    #         return None
-    #     return user.model_validate(result)
