@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from typing import Union
 from typing_extensions import Annotated
 from fastapi import Form

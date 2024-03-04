@@ -1,12 +1,11 @@
-from typing import Annotated, Union
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
-from models.model_todo import TodoModel
-from models.model_user import RegisterModel, LoginModel, UserBase
 from models.model_authCustom import OAuth2PasswordRequestFormCustom
+from models.model_todo import TodoModel
+from models.model_user import RegisterModel
 from service.service_todo import TodoService
-from service.service_user import UserService
+from service.service_auth import AuthService
 
 route = APIRouter(prefix="/api/v1")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
@@ -49,14 +48,14 @@ def delete(
 
 
 @route.post("/register")
-def register(user: RegisterModel, service_user: UserService = Depends()):
-    result = service_user.register(user)
+def register(user: RegisterModel, service_auth: AuthService = Depends()):
+    result = service_auth.register(user)
     return result
 
 @route.post("/login")
 def login(
         form_data: OAuth2PasswordRequestFormCustom = Depends(),
-        service_user: UserService = Depends()
+        service_auth: AuthService = Depends()
     ):
-    token = service_user.login(form_data)
+    token = service_auth.auth(form_data)
     return {"access_token": token, "token_type": "bearer"}
