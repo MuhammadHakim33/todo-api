@@ -4,7 +4,6 @@ from typing import Optional
 class UserBase(BaseModel):
    name:str
    email:str 
-   password: Optional[str] = None
 
 class LoginModel(BaseModel):
    email:str

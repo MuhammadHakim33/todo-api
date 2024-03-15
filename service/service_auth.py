@@ -1,42 +1,61 @@
-from fastapi import Depends, HTTPException
-from models.model_user import RegisterModel, LoginModel, UserBase
-from service.service_token import TokenJWT
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from models.model_user import RegisterModel, LoginModel, LoginModel, UserBase
+from service.service_token import decode_token
 from repository.repository_user import UserRepository
 from passlib.context import CryptContext
+from jose import JWTError
 
-class AuthService:
-    def __init__(self, repo_user: UserRepository = Depends()):
-        self.pwd_context = CryptContext(schemes=["sha256_crypt"])
-        self.repo_user = repo_user
+pwd_context = CryptContext(schemes=["sha256_crypt"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
+repo_user = UserRepository()
 
-    def get_password_hash(self, password):
-        return self.pwd_context.hash(password)
+def verified_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = decode_token(token)
+        email: str = payload.get("sub")
+        print(payload)
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
     
-    def verify_password(self, plain_password, hashed_password):
-        return self.pwd_context.verify(plain_password, hashed_password)
+    user = repo_user.find({'email': email})
+    if user is None:
+        raise credentials_exception
+    return UserBase(**user)
 
-    def email_must_unique(self, email):
-        result = self.repo_user.find({'email': email})
-        if result:
-            raise HTTPException(detail='Email is already registered', status_code=409)
-        return True
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
-    def register(self, user: RegisterModel):
-        self.email_must_unique(user.email)
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
-        hash = self.get_password_hash(user.password)
-        user.password = hash
-        return self.repo_user.create(user)
-    
-    def auth(self, form_data: LoginModel):
-        user_logged = self.repo_user.find({'email': form_data.email})
-        if not user_logged:
-            raise HTTPException(status_code=400, detail="Incorrect email or password")
-        user = UserBase(**user_logged)
-        hashed_password = self.verify_password(form_data.password, user.password)
-        if not hashed_password:
-            raise HTTPException(status_code=400, detail="Incorrect email or password")
-        tokenjwt = TokenJWT()
-        token = tokenjwt.create_access_token()
-        return token
-       
+def email_must_unique(email):
+    result = repo_user.find({'email': email})
+    if result:
+        raise HTTPException(detail='Email is already registered', status_code=409)
+    return True
+
+def register(user: RegisterModel):
+    email_must_unique(user.email)
+
+    hash = get_password_hash(user.password)
+    user.password = hash
+    return repo_user.create(user)
+
+def auth(form_data: LoginModel):
+    user_logged = repo_user.find({'email': form_data.email})
+    if not user_logged:
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    user = LoginModel(**user_logged)
+    hashed_password = verify_password(form_data.password, user.password)
+    if not hashed_password:
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    return user
