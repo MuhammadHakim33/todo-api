@@ -20,7 +20,6 @@ def verified_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token)
         email: str = payload.get("sub")
-        print(payload)
         if email is None:
             raise credentials_exception
     except JWTError:
@@ -43,12 +42,13 @@ def email_must_unique(email):
         raise HTTPException(detail='Email is already registered', status_code=409)
     return True
 
-def register(user: RegisterModel):
+def create_user(user: RegisterModel):
     email_must_unique(user.email)
 
     hash = get_password_hash(user.password)
     user.password = hash
-    return repo_user.create(user)
+    result = repo_user.create(user)
+    return result
 
 def auth(form_data: LoginModel):
     user_logged = repo_user.find({'email': form_data.email})

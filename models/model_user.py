@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Optional
 
 class UserBase(BaseModel):
+   id:str = Field(alias='_id')
    name:str
    email:str 
 

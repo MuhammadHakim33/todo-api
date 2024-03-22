@@ -7,15 +7,18 @@ class TodoRepository:
         self.repository = db_conn().todo
 
     def store(self, todo: TodoModel):
-        return self.repository.insert_one(todo.model_dump())
+        data = todo.model_dump()
+        data.update({'user_id': ObjectId(todo.user_id)})
+        return self.repository.insert_one(data)
     
     def get(self, filter: dict):
         result = []
         data = list(self.repository.find(filter))
         for document in data:
             document["_id"] = str(document["_id"])
+            document["user_id"] = str(document["user_id"])
             result.append(TodoModel(**document))
-        return data
+        return result
     
     def get_one(self, filter: dict):
         return self.repository.find_one(filter)

@@ -7,6 +7,8 @@ class UserRepository:
 
     def find(self, filter: dict):
         result = self.repository.find_one(filter)
+        if result:
+            result["_id"] = str(result["_id"])
         return result
 
     def create(self, user: UserBase):
