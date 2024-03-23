@@ -1,6 +1,7 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from bson.objectid import ObjectId
-from models.model_todo import TodoModel
+from bson.errors import InvalidId
+from models.model_todo import BaseTodo, NewTodo, UpdateTodo
 from repository.repository_todo import TodoRepository
 from typing import Optional
 
@@ -8,8 +9,10 @@ class TodoService:
     def __init__(self, repo_todo: TodoRepository = Depends()):
         self.repo_todo = repo_todo
 
-    def store_todo(self, todo: TodoModel):
-        return self.repo_todo.store(todo)
+    def store_todo(self, todo: NewTodo, user_id: str):
+        data = todo.model_dump()
+        data.update({"user_id": ObjectId(user_id)})
+        return self.repo_todo.store(data)
     
     def get_todo(self, 
                  category: Optional[str] = None, 
@@ -25,15 +28,25 @@ class TodoService:
             filter["user_id"] = ObjectId(user)
         return self.repo_todo.get(filter)
     
-    def update_todo(self, todo_id: str, todo: TodoModel):
-        oldData = self.repo_todo.get_one({"_id": ObjectId(todo_id)})
-        newData = {
-            "name": todo.name if todo.name != "string" else oldData["name"],
-            "category": todo.category if todo.category != "string" else oldData["category"],
-            "complete": todo.complete,
-        }
-        return self.repo_todo.update(todo_id, newData)
+    def update_todo(self, todo: UpdateTodo):
+        try: 
+            dataOld = self.repo_todo.get_one({"_id": ObjectId(todo.id)})
+            data = UpdateTodo(**dataOld)
+            if todo.name is not None:
+                data.name = todo.name
+            if todo.category is not None:
+                data.category = todo.category
+            if todo.complete is not None:
+                data.complete = todo.complete
+        except InvalidId:
+            raise HTTPException(status_code=404, detail="Todo Not Found")
+        
+        return self.repo_todo.update(data)
     
     def delete_todo(self, todo_id: str):
-        oldData = self.repo_todo.get_one({"_id": ObjectId(todo_id)})
-        return self.repo_todo.delete(oldData["_id"])
+        try: 
+            dataOld = self.repo_todo.get_one({"_id": ObjectId(todo_id)})
+        except InvalidId:
+            raise HTTPException(status_code=404, detail="Todo Not Found")
+        
+        return self.repo_todo.delete(dataOld["_id"])
