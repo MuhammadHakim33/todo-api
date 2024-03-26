@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from typing import Optional
 from models.model_authCustom import OAuth2PasswordRequestFormCustom
-from models.model_todo import BaseTodo, NewTodo, UpdateTodo
-from models.model_user import RegisterModel, UserBase
+from models.model_todo import NewTodo, UpdateTodo
+from models.model_user import LoginModel, RegisterModel, UserBase
 from models.model_token import Token
 from service.service_todo import TodoService
 from service.service_auth import create_user, auth, verified_user
@@ -50,7 +50,7 @@ def register(user: RegisterModel):
     return result
 
 @route.post("/login")
-def login(form_data: OAuth2PasswordRequestFormCustom = Depends()):
+def login(form_data: LoginModel):
     user = auth(form_data)
     access_token = create_access_token(data={"sub": user.email})
     return Token(access_token=access_token, token_type="bearer")
