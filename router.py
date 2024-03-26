@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from typing import Optional
-from models.model_authCustom import OAuth2PasswordRequestFormCustom
 from models.model_todo import NewTodo, UpdateTodo
 from models.model_user import LoginModel, RegisterModel, UserBase
 from models.model_token import Token
