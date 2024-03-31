@@ -15,22 +15,29 @@ class TodoService:
         return self.repo_todo.store(data)
     
     def get_todo(self, 
+                 user_id: str,
                  category: Optional[str] = None, 
-                 complete: Optional[bool] = None,
-                 user: Optional[str] = None
+                 complete: Optional[bool] = None
         ):
         filter = {}
         if category is not None:
             filter["category"] = category
         if complete is not None:
             filter["complete"] = complete
-        if user is not None:
-            filter["user_id"] = ObjectId(user)
+
+        if not user_id:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        
+        filter["user_id"] = ObjectId(user_id)
         return self.repo_todo.get(filter)
     
-    def update_todo(self, todo: UpdateTodo):
+    def update_todo(self, todo: UpdateTodo, user_id: str):
         try: 
             dataOld = self.repo_todo.get_one({"_id": ObjectId(todo.id)})
+
+            if dataOld["user_id"] != user_id:
+                raise HTTPException(status_code=403, detail="Forbidden")
+            
             data = UpdateTodo(**dataOld)
             if todo.name is not None:
                 data.name = todo.name
@@ -45,9 +52,13 @@ class TodoService:
         
         return self.repo_todo.update(data)
     
-    def delete_todo(self, todo_id: str):
+    def delete_todo(self, todo_id: str, user_id: str):
         try: 
             dataOld = self.repo_todo.get_one({"_id": ObjectId(todo_id)})
+
+            if dataOld["user_id"] != user_id:
+                raise HTTPException(status_code=403, detail="Forbidden")
+            
         except InvalidId:
             raise HTTPException(status_code=404, detail="Todo Not Found")
         

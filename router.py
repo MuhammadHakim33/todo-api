@@ -6,7 +6,6 @@ from models.model_token import Token
 from service.service_todo import TodoService
 from service.service_auth import create_user, auth, verified_user
 from service.service_token import create_access_token
-from datetime import date
 
 route = APIRouter(prefix="/api/v1")
 
@@ -17,7 +16,7 @@ def get(
         service_todo: TodoService = Depends(),
         user: UserBase = Depends(verified_user)
     ):
-    return service_todo.get_todo(category, complete, user.id)
+    return service_todo.get_todo(user.id, category, complete)
 
 @route.post("/todos")
 def store(
@@ -33,7 +32,7 @@ def update(
         service_todo: TodoService = Depends(),
         user: UserBase = Depends(verified_user)
     ):
-    return service_todo.update_todo(todo)
+    return service_todo.update_todo(todo, user.id)
 
 @route.delete("/todos/{todo_id}")
 def delete(
@@ -41,7 +40,7 @@ def delete(
         service_todo: TodoService = Depends(),
         user: UserBase = Depends(verified_user)
     ):
-    return service_todo.delete_todo(todo_id)
+    return service_todo.delete_todo(todo_id, user.id)
 
 
 @route.post("/register")

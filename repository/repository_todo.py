@@ -22,8 +22,12 @@ class TodoRepository:
     
     def get_one(self, filter: dict):
         data = self.repository.find_one(filter)
+        
         if not data:
             raise HTTPException(status_code=404, detail="Todo Not Found")
+        if data["user_id"] is not None:
+            data["user_id"] = str(data["user_id"])
+
         data["_id"] = str(data["_id"])
         return data
     
