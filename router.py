@@ -6,6 +6,7 @@ from models.model_token import Token
 from service.service_todo import TodoService
 from service.service_auth import create_user, auth, verified_user
 from service.service_token import create_access_token
+from datetime import date
 
 route = APIRouter(prefix="/api/v1")
 

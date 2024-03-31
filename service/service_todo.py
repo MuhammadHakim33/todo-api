@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
-from models.model_todo import BaseTodo, NewTodo, UpdateTodo
+from models.model_todo import NewTodo, UpdateTodo
 from repository.repository_todo import TodoRepository
 from typing import Optional
 
@@ -38,6 +38,8 @@ class TodoService:
                 data.category = todo.category
             if todo.complete is not None:
                 data.complete = todo.complete
+            if todo.due is not None:
+                data.due = todo.due
         except InvalidId:
             raise HTTPException(status_code=404, detail="Todo Not Found")
         
